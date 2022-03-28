@@ -1,4 +1,4 @@
-package com.tcs.crs;
+package com.tcs.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -12,10 +12,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAutoConfiguration
 @EnableWebMvc
 
-public class DemoCrsStudentApplication {
+public class CrsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoCrsStudentApplication.class, args);
+		SpringApplication.run(CrsApplication.class, args);
 	}
 
 }

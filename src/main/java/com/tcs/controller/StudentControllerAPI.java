@@ -1,4 +1,4 @@
-package com.tcs.crs.controller;
+package com.tcs.controller;
 
 /*
 import java.util.List;
@@ -39,11 +39,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tcs.crs.dao.StudentDAOImpl;
-import com.tcs.crs.model.Courses;
-import com.tcs.crs.model.Grades;
-import com.tcs.crs.model.PayFee;
-import com.tcs.crs.model.Student;
+import com.tcs.dao.StudentDAOImpl;
+import com.tcs.mapper.CourseMapping;
+import com.tcs.model.Courses;
+import com.tcs.model.Grades;
+import com.tcs.model.PayFee;
+import com.tcs.model.Professor;
+import com.tcs.model.Student;
 
 
 
@@ -55,18 +57,17 @@ public class StudentControllerAPI {
 	@Autowired
 	private StudentDAOImpl crsdao;
 	
-	@RequestMapping(value = "/Registration", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	
 	/*
 	 * Register Student Details
 	 * @Param student
 	 * @Throws
 	 */
-	public ResponseEntity  Register(@RequestBody Student students)
+	@RequestMapping(value = "/StudentRegistration", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
+	@ResponseBody
+	public ResponseEntity  StudentRegister(@RequestBody Student students)
 	{
 		String response = null;
-		response =  crsdao.register(students);
+		response =  crsdao.studentRegister(students);
 		
 		if(response.equals("Successful"))
 		{
@@ -80,25 +81,48 @@ public class StudentControllerAPI {
 	}
 	
 	/*
-	 * Add Course Details
-	 * @Param course
+	 * Register Professor Details
+	 * @Param student
 	 * @Throws
 	 */
-	@RequestMapping(value = "/AddCourse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
+	@RequestMapping(value = "/ProfessorRegistration", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
 	@ResponseBody
-	public ResponseEntity  AddCourse(Courses course)
+	public ResponseEntity  ProfessorRegister(@RequestBody Professor professor)
 	{
 		String response = null;
-		response =  crsdao.addcourse(course);
+		response =  crsdao.professorRegister(professor);
 		
 		if(response.equals("Successful"))
 		{
-			return new ResponseEntity("Course Added Successfully",HttpStatus.OK) ;
+			return new ResponseEntity("Details added Successfully",HttpStatus.OK) ;
 		}
 		
 		else 
 			
 			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
+		
+	}
+	
+	/*
+	 * Fetch Course Details
+	 * @Param course
+	 * @Throws
+	 */
+	@RequestMapping(value = "/FetchCourse", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON )
+	@ResponseBody
+	public ResponseEntity  fetchCourse()
+	{
+		
+		List<Courses> course =  crsdao.fetchCourse();
+		if(course.isEmpty())
+		{
+			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
+		}
+		
+		else
+		return new ResponseEntity(course,HttpStatus.OK) ;
+		
+
 	}
 
 	/*
@@ -106,20 +130,23 @@ public class StudentControllerAPI {
 	 * @Param courseId
 	 * @Throws
 	 */
-	@RequestMapping(value = "/DeleteCourse/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON )
+	@RequestMapping(value = "/DeleteCourse/{id}/{courseId}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
 	@ResponseBody
-	public ResponseEntity  DeleteCourse(@PathVariable("id") int id)
+	public ResponseEntity  DeleteCourse(@PathVariable("id") int id, @PathVariable("courseId") int courseId) throws NullPointerException
 	{
-		String response = crsdao.deletecourse(id);
+		int response = crsdao.deletecourse(id,courseId);
 		
-		if(response.equals("Successful"))
+		if(response == 0)
 		{
-			return new ResponseEntity("Course Deleted Successfully",HttpStatus.OK) ;
+			
+			return new ResponseEntity("Already Deleted",HttpStatus.NOT_FOUND) ;
 		}
 		
 		else 
+			return new ResponseEntity("Course Deleted Successfully",HttpStatus.OK) ;
 		
-			return new ResponseEntity("No Such Course Exists",HttpStatus.NOT_FOUND) ;
+		
+		
 	}
 	
 	/*
@@ -168,20 +195,20 @@ public class StudentControllerAPI {
 	
 	/*
 	 * View Courses
-	 * @Param course
+	 * @Param id
 	 * @Throws
 	 */
 	
-	@RequestMapping(value = "/ViewCourse", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+	@RequestMapping(value = "/AddCourse/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public ResponseEntity ViewCourse(Courses course)
+	public ResponseEntity ViewCourse(@PathVariable("id") long id)
 	{
-		if(crsdao.viewCourse(course).isEmpty()) 
+		if(crsdao.viewCourse(id).equals(null)) 
 		{
-			return new ResponseEntity("No Active Courses",HttpStatus.NOT_FOUND);
+			return new ResponseEntity("No Student Exists",HttpStatus.NOT_FOUND);
 		}
 	
-		return new ResponseEntity(crsdao.viewCourse(course),HttpStatus.OK);
+		return new ResponseEntity("Courses Added Successfully",HttpStatus.OK);
 	}
 	
 

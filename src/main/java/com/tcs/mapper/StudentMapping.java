@@ -1,14 +1,14 @@
 /**
  * 
  */
-package Mapper;
+package com.tcs.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.tcs.crs.model.Student;
+import com.tcs.model.Student;
 
 /**
  * @author springuser05
@@ -23,8 +23,8 @@ public class StudentMapping implements RowMapper<Student>{
 		student.setAddress(r.getString("address"));
 		student.setDob(r.getString("dob"));
 		student.setEmailId(r.getString("email"));
-		student.setFirstName(r.getString("firstname"));
-		student.setLastName(r.getString("lastname"));
+		student.setFirstName(r.getString("first_name"));
+		student.setLastName(r.getString("last_name"));
 		student.setId(r.getLong("id"));
 		student.setMobileNo(r.getLong("mobile"));
 		return student;

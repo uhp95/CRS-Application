@@ -1,4 +1,4 @@
-package com.tcs.crs.service;
+package com.tcs.service;
 
 public interface CrsFuntionalities {
 	

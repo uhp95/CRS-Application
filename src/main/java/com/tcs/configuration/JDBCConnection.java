@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.tcs.crs.configuration;
+package com.tcs.configuration;
 
 import javax.sql.DataSource;
 

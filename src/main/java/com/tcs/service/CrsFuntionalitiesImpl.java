@@ -1,4 +1,4 @@
-package com.tcs.crs.service;
+package com.tcs.service;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;

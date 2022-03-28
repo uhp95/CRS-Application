@@ -1,4 +1,4 @@
-package com.tcs.crs.model;
+package com.tcs.model;
 
 public class PayFee {
 
