@@ -39,13 +39,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tcs.dao.StudentDAOImpl;
+import com.tcs.dao.UserDAOImpl;
 import com.tcs.mapper.CourseMapping;
 import com.tcs.model.Courses;
 import com.tcs.model.Grades;
 import com.tcs.model.PayFee;
 import com.tcs.model.Professor;
 import com.tcs.model.Student;
+import com.tcs.model.StudentGrades;
 
 
 
@@ -55,7 +56,7 @@ import com.tcs.model.Student;
 public class StudentControllerAPI {
 
 	@Autowired
-	private StudentDAOImpl crsdao;
+	private UserDAOImpl crsdao;
 	
 	/*
 	 * Register Student Details
@@ -103,6 +104,95 @@ public class StudentControllerAPI {
 		
 	}
 	
+
+	
+	/*
+	 * Payment Details
+	 * @Param fee
+	 * @Throws
+	 */
+	@RequestMapping(value ="/PayFee/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
+	@ResponseBody
+	public ResponseEntity Fee(@RequestBody PayFee fee, @PathVariable("id") long id)
+	{
+		String response = null;
+		response = crsdao.fees(fee);
+		
+		if(response.equals("Successful"))
+		{
+			return new ResponseEntity("Loading...",HttpStatus.OK);
+		}
+		
+		 return new ResponseEntity("Server Busy. Try Again Later",HttpStatus.NOT_FOUND);
+	}
+	
+	/*
+	 * Add New Courses
+	 * @Param course
+	 * @Throws
+	 */
+	@RequestMapping(value = "/AddCourses", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
+	@ResponseBody
+	public ResponseEntity  AddCourses(@RequestBody Courses course)
+	{
+		String response = null;
+		response =  crsdao.addCourse(course);
+		
+		if(response.equals("Successful"))
+		{
+			return new ResponseEntity("Course added Successfully",HttpStatus.OK) ;
+		}
+		
+		else 
+			
+			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
+		
+	}
+	
+	
+	
+	
+	/*
+	 * View Courses
+	 * @Param id
+	 * @Throws
+	 */
+	
+	@RequestMapping(value = "/AddCourse/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON)
+	@ResponseBody
+	public ResponseEntity ViewCourse(@PathVariable("id") long id)
+	{
+		if(crsdao.viewCourse(id).equals(null)) 
+		{
+			return new ResponseEntity("No Student Exists",HttpStatus.NOT_FOUND);
+		}
+	
+		return new ResponseEntity("Courses Added Successfully",HttpStatus.OK);
+	}
+	
+	/*
+	 * Fetch Professor Details for course
+	 * @Param course
+	 * @Throws
+	 */
+	@RequestMapping(value = "/FetchCourse/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON )
+	@ResponseBody
+	public ResponseEntity  fetchCourse(@PathVariable("id") int id)
+	{
+		
+		List<List<Professor>> professor =  crsdao.fetchCourse(id);
+		if(professor.isEmpty())
+		{
+			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
+		}
+		
+		else
+		return new ResponseEntity(professor,HttpStatus.OK) ;
+		
+
+	}
+	
+	
 	/*
 	 * Fetch Course Details
 	 * @Param course
@@ -124,6 +214,7 @@ public class StudentControllerAPI {
 		
 
 	}
+	
 
 	/*
 	 * Delete Course Details
@@ -149,67 +240,60 @@ public class StudentControllerAPI {
 		
 	}
 	
+	
 	/*
-	 * View Grade Details
-	 * @Param id
+	 * Add grades to students by professor
+	 * @Param grades
+	 * @Throws
+	 */
+	@RequestMapping(value = "/AddGrades/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
+	@ResponseBody
+	public ResponseEntity  AddGrades(@PathVariable("id") int id,@RequestBody StudentGrades grades) throws NullPointerException
+	{
+		
+		int response = crsdao.addGrades(id,grades);
+		
+		if(response == 0)
+		{
+			
+			return new ResponseEntity("Grade not set. Please try again...",HttpStatus.NOT_FOUND) ;
+		}
+		
+		else 
+			return new ResponseEntity("Grade is set for student",HttpStatus.OK) ;
+		
+		
+		
+	}
+	
+	
+	/*
+	 * View grades by students
+	 * @Param grades
 	 * @Throws
 	 */
 	@RequestMapping(value = "/ViewGrades/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON )
 	@ResponseBody
-	public ResponseEntity  ViewCourse(@PathVariable("id") int id)
+	public ResponseEntity  AddGrades(@PathVariable("id") int id) throws NullPointerException
 	{
-		float response = crsdao.viewgrades(id);
 		
-		if(response == 0)
+		List<Grades> response = crsdao.viewgrades(id);
+		
+		if(response.isEmpty())
 		{
-			return new ResponseEntity("No Grade Set",HttpStatus.NOT_FOUND) ;
+			
+			return new ResponseEntity("Grade not set. Please try again...",HttpStatus.NOT_FOUND) ;
 		}
 		
-		else
-		{
-			return new ResponseEntity("You have scored " + response,HttpStatus.OK) ;
-		}
+		else 
+			for (Grades g: response)
+			{
+			return new ResponseEntity("You have Scored "+g.getGrade()+" with percentage in between "+g.getPercent(),HttpStatus.OK) ;
+			}
+		
+		return null;
 		
 	}
-	
-	/*
-	 * Payment Details
-	 * @Param fee
-	 * @Throws
-	 */
-	@RequestMapping(value ="/PayFee", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
-	@ResponseBody
-	public ResponseEntity Fee(PayFee fee)
-	{
-		String response = null;
-		response = crsdao.fees(fee);
-		
-		if(response.equals("Successful"))
-		{
-			return new ResponseEntity("Loading...",HttpStatus.OK);
-		}
-		
-		 return new ResponseEntity("Server Busy. Try Again Later",HttpStatus.NOT_FOUND);
-	}
-	
-	
-	/*
-	 * View Courses
-	 * @Param id
-	 * @Throws
-	 */
-	
-	@RequestMapping(value = "/AddCourse/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON)
-	@ResponseBody
-	public ResponseEntity ViewCourse(@PathVariable("id") long id)
-	{
-		if(crsdao.viewCourse(id).equals(null)) 
-		{
-			return new ResponseEntity("No Student Exists",HttpStatus.NOT_FOUND);
-		}
-	
-		return new ResponseEntity("Courses Added Successfully",HttpStatus.OK);
-	}
-	
+
 
 }

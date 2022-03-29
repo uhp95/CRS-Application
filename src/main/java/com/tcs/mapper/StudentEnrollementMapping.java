@@ -26,8 +26,8 @@ public class StudentEnrollementMapping implements RowMapper<StudentEnrollment> {
 		 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");  
 		   Date date = new Date();  
 		StudentEnrollment se = new StudentEnrollment();
-		se.setCourseId(r.getLong("course_id"));
-		se.setStudentId(r.getLong("student_id"));
+		se.setCourseId(r.getLong("courseid"));
+		se.setStudentId(r.getLong("studentid"));
 		se.setDoe(r.getDate(formatter.format(date)));
 		
 		return se;

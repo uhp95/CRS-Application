@@ -1,46 +1,117 @@
 package com.tcs.model;
 
+import java.util.Date;
+
 public class PayFee {
 
 	private String modeOfPayment;
 	private float amount;
-	private String cardDetails;
+	private long cardNumber;
 	private long transactionId;
+	private String cardType;
+	private Date dop;
+	
+	
+	
 	
 	public String getModeOfPayment() {
 		return modeOfPayment;
 	}
+
+
+
+
 	public void setModeOfPayment(String modeOfPayment) {
 		this.modeOfPayment = modeOfPayment;
 	}
+
+
+
+
 	public float getAmount() {
 		return amount;
 	}
+
+
+
+
 	public void setAmount(float amount) {
 		this.amount = amount;
 	}
-	public String getCardDetails() {
-		return cardDetails;
+
+
+
+
+	public long getCardNumber() {
+		return cardNumber;
 	}
-	public void setCardDetails(String cardDetails) {
-		this.cardDetails = cardDetails;
+
+
+
+
+	public void setCardNumber(long cardNumber) {
+		this.cardNumber = cardNumber;
 	}
+
+
+
+
 	public long getTransactionId() {
 		return transactionId;
 	}
+
+
+
+
 	public void setTransactionId(long transactionId) {
 		this.transactionId = transactionId;
 	}
+
+
+
+
+	public String getCardType() {
+		return cardType;
+	}
+
+
+
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
+	}
+
+
+
+
+	public Date getDop() {
+		return dop;
+	}
+
+
+
+
+	public void setDop(Date dop) {
+		this.dop = dop;
+	}
+
+
 	
-	public PayFee(String modeOfPayment, float amount, String cardDetails, long transactionId) {
+
+
+	public PayFee(String modeOfPayment, float amount, long cardNumber, long transactionId, String cardType, Date dop) {
 		super();
 		this.modeOfPayment = modeOfPayment;
 		this.amount = amount;
-		this.cardDetails = cardDetails;
+		this.cardNumber = cardNumber;
 		this.transactionId = transactionId;
+		this.cardType = cardType;
+		this.dop = dop;
 	}
-	
-	
+
+
+
+
 	public PayFee()
 	{
 		

@@ -23,8 +23,8 @@ public class StudentMapping implements RowMapper<Student>{
 		student.setAddress(r.getString("address"));
 		student.setDob(r.getString("dob"));
 		student.setEmailId(r.getString("email"));
-		student.setFirstName(r.getString("first_name"));
-		student.setLastName(r.getString("last_name"));
+		student.setFirstName(r.getString("firstname"));
+		student.setLastName(r.getString("lastname"));
 		student.setId(r.getLong("id"));
 		student.setMobileNo(r.getLong("mobile"));
 		return student;
