@@ -28,7 +28,7 @@ public class StudentEnrollementMapping implements RowMapper<StudentEnrollment> {
 		StudentEnrollment se = new StudentEnrollment();
 		se.setCourseId(r.getLong("courseid"));
 		se.setStudentId(r.getLong("studentid"));
-		se.setDoe(r.getDate(formatter.format(date)));
+		se.setDoe(r.getDate("DateOfEnrollment"));
 		
 		return se;
 	}

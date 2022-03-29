@@ -6,10 +6,11 @@ public class PayFee {
 
 	private String modeOfPayment;
 	private float amount;
-	private long cardNumber;
+	private String cardNumber;
 	private long transactionId;
 	private String cardType;
 	private Date dop;
+
 	
 	
 	
@@ -42,14 +43,14 @@ public class PayFee {
 
 
 
-	public long getCardNumber() {
+	public String getCardNumber() {
 		return cardNumber;
 	}
 
 
 
 
-	public void setCardNumber(long cardNumber) {
+	public void setCardNumber(String cardNumber) {
 		this.cardNumber = cardNumber;
 	}
 
@@ -99,7 +100,7 @@ public class PayFee {
 	
 
 
-	public PayFee(String modeOfPayment, float amount, long cardNumber, long transactionId, String cardType, Date dop) {
+	public PayFee(String modeOfPayment, float amount, String cardNumber, long transactionId, String cardType, Date dop) {
 		super();
 		this.modeOfPayment = modeOfPayment;
 		this.amount = amount;

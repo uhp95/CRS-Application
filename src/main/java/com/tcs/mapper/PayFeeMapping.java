@@ -22,10 +22,10 @@ public class PayFeeMapping implements RowMapper<PayFee>{
 	{
 		PayFee pf = new PayFee();
 		pf.setAmount(rs.getFloat("amount"));
-		pf.setCardNumber(rs.getLong("CardNumber"));
-		pf.setCardType(rs.getString("CardType"));
-		pf.setDop(rs.getDate("DateOfPayment"));
-		pf.setModeOfPayment(rs.getString("ModeOfPayment"));
+		pf.setCardNumber(rs.getString("cardnumber"));
+		pf.setCardType(rs.getString("cardtype"));
+		pf.setDop(rs.getDate("dateofpayment"));
+		pf.setModeOfPayment(rs.getString("modeofpayment"));
 		pf.setTransactionId(rs.getLong("id"));
 		return pf;
 	}
