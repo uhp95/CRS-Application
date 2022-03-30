@@ -1,5 +1,7 @@
 package com.tcs.controller;
 
+import java.util.HashMap;
+
 /*
 import java.util.List;
 
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 */
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
@@ -39,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tcs.dao.UserDAOImpl;
+import com.tcs.dao.StudentDAOImpl;
 import com.tcs.mapper.CourseMapping;
 import com.tcs.model.Courses;
 import com.tcs.model.Grades;
@@ -47,16 +50,17 @@ import com.tcs.model.PayFee;
 import com.tcs.model.Professor;
 import com.tcs.model.Student;
 import com.tcs.model.StudentGrades;
+import com.tcs.model.UserManagement;
 
 
 
 
 @Controller
 @RestController
-public class ApplicationControllerAPI {
+public class StudentControllerAPI {
 
 	@Autowired
-	private UserDAOImpl crsdao;
+	private StudentDAOImpl crsdao;
 	
 	/*
 	 * Student will register his/her own details
@@ -69,41 +73,15 @@ public class ApplicationControllerAPI {
 	{
 		String response = null;
 		response =  crsdao.studentRegister(students);
-		
 		if(response.equals("Successful"))
 		{
 			return new ResponseEntity("Details added Successfully",HttpStatus.OK) ;
 		}
 		
 		else 
-			
 			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
 		
 	}
-	
-	/*
-	 * Admin will register professor details
-	 * @Param professor object
-	 * @Throws
-	 */
-	@RequestMapping(value = "/ProfessorRegistration", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  ProfessorRegister(@RequestBody Professor professor)
-	{
-		String response = null;
-		response =  crsdao.professorRegister(professor);
-		
-		if(response.equals("Successful"))
-		{
-			return new ResponseEntity("Details added Successfully",HttpStatus.OK) ;
-		}
-		
-		else 
-			
-			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
-		
-	}
-	
 
 	
 	/*
@@ -117,7 +95,6 @@ public class ApplicationControllerAPI {
 	{
 		
 		int response = crsdao.fees(fee,id);
-		
 		if(response == 0)
 		{
 			
@@ -126,31 +103,6 @@ public class ApplicationControllerAPI {
 		
 		return new ResponseEntity("Loading...",HttpStatus.OK);
 	}
-	
-	/*
-	 * Admin will add new courses
-	 * @Param course object
-	 * @Throws
-	 */
-	@RequestMapping(value = "/AddCourses", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  AddCoursesByAdmin(@RequestBody Courses course)
-	{
-		String response = null;
-		response =  crsdao.addCourse(course);
-		
-		if(response.equals("Successful"))
-		{
-			return new ResponseEntity("Course added Successfully",HttpStatus.OK) ;
-		}
-		
-		else 
-			
-			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
-		
-	}
-	
-	
 	
 	
 	/*
@@ -177,49 +129,25 @@ public class ApplicationControllerAPI {
 	 * @Param professor id
 	 * @Throws
 	 */
-	@RequestMapping(value = "/FetchProfessor/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON )
+	@RequestMapping(value = "/FetchProfessor/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
 	@ResponseBody
-	public ResponseEntity  fetchCourse(@PathVariable("id") int id)
+	public ResponseEntity  fetchCourse(@PathVariable("id") int id, @RequestBody UserManagement user)
 	{
 		
-		List<List<Professor>> professor =  crsdao.fetchCourse(id);
+		List<List<Professor>> professor =  crsdao.fetchCourse(id,user);
 		if(professor.isEmpty())
 		{
-			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
+			return new ResponseEntity("Invalid Credentials",HttpStatus.NOT_FOUND) ;
 		}
 		
 		else
 		return new ResponseEntity(professor,HttpStatus.OK) ;
 		
-
 	}
 	
 	
 	/*
-	 * Fetch Student Details for course will be used by professor
-	 * @Param professor id
-	 * @Throws
-	 */
-	@RequestMapping(value = "/FetchStudentDetails/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  fetchCourse(@PathVariable("id") long id)
-	{
-		
-		List<List<Student>> student =  crsdao.fetchStudents(id);
-		if(student.isEmpty())
-		{
-			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
-		}
-		
-		else
-		return new ResponseEntity(student,HttpStatus.OK) ;
-		
-
-	}
-	
-	
-	/*
-	 * Fetch Course Details for course By Students 
+	 * Fetch  Details of course By Students 
 	 * @Param 
 	 * @Throws
 	 */
@@ -236,7 +164,6 @@ public class ApplicationControllerAPI {
 		
 		else
 		return new ResponseEntity(course,HttpStatus.OK) ;
-		
 
 	}
 	
@@ -261,35 +188,10 @@ public class ApplicationControllerAPI {
 		else 
 			return new ResponseEntity("Course Deleted Successfully",HttpStatus.OK) ;
 		
-		
-		
 	}
 	
 	
-	/*
-	 * Add grades to students by professor
-	 * @Param grades and professor id
-	 * @Throws
-	 */
-	@RequestMapping(value = "/AddGradesByProfessor/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  AddGrades(@PathVariable("id") int id,@RequestBody StudentGrades grades) throws NullPointerException
-	{
-		
-		int response = crsdao.addGradesByProfessor(id,grades);
-		
-		if(response == 0)
-		{
-			
-			return new ResponseEntity("Grade not set. Please try again...",HttpStatus.NOT_FOUND) ;
-		}
-		
-		else 
-			return new ResponseEntity("Grade is set for student",HttpStatus.OK) ;
-		
-		
-		
-	}
+	
 	
 	
 	/*
@@ -302,7 +204,9 @@ public class ApplicationControllerAPI {
 	public ResponseEntity  AddGrades(@PathVariable("id") int id) throws NullPointerException
 	{
 		
-		List<Grades> response = crsdao.viewgrades(id);
+		Map response = new HashMap<String,List<List<Grades>>>();
+				
+			response=	crsdao.viewgrades(id);
 		
 		if(response.isEmpty())
 		{
@@ -311,9 +215,12 @@ public class ApplicationControllerAPI {
 		}
 		
 		else 
-			for (Grades g: response)
+			//for (Map.Entry<String,List<List<Grades>>> e: response.entrySet())
 			{
-			return new ResponseEntity("You have Scored "+g.getGrade()+" with percentage in between "+g.getPercent(),HttpStatus.OK) ;
+				
+				//	return new ResponseEntity("You have Scored "+e.getGrade()+" with percentage in between "+e.getPercent()+" in "+e.ge,HttpStatus.OK) ;
+				
+			
 			}
 		
 		return null;
@@ -321,80 +228,12 @@ public class ApplicationControllerAPI {
 	}
 	
 	
-	/*
-	 * Add New Grades By Admin
-	 * @Param course
-	 * @Throws
-	 */
-	@RequestMapping(value = "/AddGradesByAdmin", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  AddCourses(@RequestBody Grades grade)
-	{
-		
-		String response = null;
-		response =  crsdao.addGradesByAdmin(grade);
-		
-		if(response.equals("Successful"))
-		{
-			return new ResponseEntity("Grade added Successfully",HttpStatus.OK) ;
-		}
-		
-		else 
-			
-			return new ResponseEntity("Error",HttpStatus.NOT_FOUND) ;
-		
-	}
+	
 
 	
-	/*
-	 * Remove Courses By Admin
-	 * @Param course
-	 * @Throws
-	 */
-	@RequestMapping(value = "/DeleteCourse/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  DeleteCoursesByAdmin(@PathVariable("id") int id)
-	{
-		
 	
-		int response =  crsdao.deleteCoursesByAdmin(id);
-		
-		if(response==0)
-		{
-			
-			return new ResponseEntity("No Such Course Exists",HttpStatus.NOT_FOUND) ;
-		}
-		
-		else 
-			return new ResponseEntity("Course deleted Successfully",HttpStatus.OK);
-			
-		
-	}
 	
-	/*
-	 * Admin Approval for students
-	 * @Param course
-	 * @Throws
-	 */
-	@RequestMapping(value = "/AdminApproval/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON )
-	@ResponseBody
-	public ResponseEntity  StudentApprovalByAdmin(@PathVariable("id") int id)
-	{
-		
 	
-		int response =  crsdao.studentApprovalByAdmin(id);
-		
-		if(response==0)
-		{
-			
-			return new ResponseEntity("No Student with Id Exists",HttpStatus.NOT_FOUND) ;
-		}
-		
-		else 
-			return new ResponseEntity("Approved",HttpStatus.OK);
-			
-		
-	}
 	
 
 }

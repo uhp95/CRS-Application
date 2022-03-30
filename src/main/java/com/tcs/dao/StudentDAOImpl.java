@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.tomcat.jni.Time;
@@ -22,7 +24,9 @@ import com.tcs.mapper.GradeMapping;
 import com.tcs.mapper.ProfessorCourseMapping;
 import com.tcs.mapper.ProfessorMapping;
 import com.tcs.mapper.StudentEnrollementMapping;
+import com.tcs.mapper.StudentGradeMapping;
 import com.tcs.mapper.StudentMapping;
+import com.tcs.mapper.UserManagementMapping;
 import com.tcs.model.AdminApproval;
 import com.tcs.model.Courses;
 import com.tcs.model.Grades;
@@ -32,14 +36,17 @@ import com.tcs.model.ProfessorCourses;
 import com.tcs.model.Student;
 import com.tcs.model.StudentEnrollment;
 import com.tcs.model.StudentGrades;
+import com.tcs.model.UserManagement;
 
 
 
 @Repository
-public class UserDAOImpl implements UserDAO {
+public class StudentDAOImpl implements StudentDAO {
 	
-	Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 	
+	Logger logger = LoggerFactory.getLogger(StudentDAOImpl.class);
 	
 	private static List<Student> students;
 	{
@@ -49,8 +56,6 @@ public class UserDAOImpl implements UserDAO {
 	{
 		studentEnrollment = new ArrayList();
 	}
-	
-	
 	private static List<List<Student>> studentsDetails;
 	{
 		studentsDetails = new ArrayList();
@@ -70,22 +75,30 @@ public class UserDAOImpl implements UserDAO {
 		professor = new ArrayList();
 	}
 	
-	private static List<Grades> grades;
+	private static List<Grades> grade;
+	{
+		grade = new ArrayList();
+	}
+
+	private static List<List<Grades>> grades;
 	{
 		grades = new ArrayList();
 	}
-
+	
 	private static List<PayFee> fees;
 	{
 		fees = new ArrayList();
 	}
-	private static List<AdminApproval> approval;
+	
+	private static List<StudentGrades> studentgrade;
 	{
-		approval = new ArrayList();
+		studentgrade = new ArrayList();
 	}
 	
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+	private static List<UserManagement> users;
+	{
+		users = new ArrayList();
+	}
 	
 	
 	/*
@@ -97,93 +110,76 @@ public class UserDAOImpl implements UserDAO {
 	@Transactional
 	public   String studentRegister(Student student) {
 		
+		Date date = new Date();
 		String Sql = "insert into Studentregistration (firstname,lastname,address,email,mobile,DoB) "
 				+ "values(?,?,?,?,?,?)";	
 		jdbcTemplate.update(Sql, student.getFirstName(),student.getLastName(),student.getAddress(),student.getEmailId(),student.getMobileNo(),student.getDob());
 		logger.debug("Debugging");
 		String Sql1 = "select *  from studentregistration where id in (select max(id) from studentregistration)";
-		//String Sql1 = "select id as studentid, '' as status from studentregistration";
 		students=jdbcTemplate.query(Sql1, new StudentMapping());
 		for(Student s: students)
 		{
 			String Sql2 = "insert into AdminApproval (studentid,status) values(?,?)";
 			jdbcTemplate.update(Sql2,s.getId(),"Not Approved");
+			String Sql3 = "insert into usermanagement(userid,status,roleid,logintime) values(?,?,?,?)";
+			jdbcTemplate.update(Sql3,s.getId(),"In Active",3,date);
+			
 		}
+		
+		
 		
 		return "Successful";
 			
 	}
 	
-	/*
-	 * Admin will register professor details
-	 * @Param professor object
-	 * @Throws
-	 */
-	@Override
-	@Transactional
-	public String professorRegister(Professor professor) {
-		
-		String Sql = "insert into professor (name,mobile,email) "
-				+ "values(?,?,?)";	
-		jdbcTemplate.update(Sql,professor.getName(),professor.getMobile(),professor.getEmail());
-		logger.debug("Debugging");
-		return "Successful";
-		
-	}
-		
 
 	/*
-	 * Fetch Course Details for course By Students 
-	 * @Param 
+	 * Fetch  Details of course By Students 
+	 * @Param
 	 * @Throws
 	 */
 	@Override
 	@Transactional
-	public List<List<Professor>> fetchCourse(int id) 
+	public List<List<Professor>> fetchCourse(int id,UserManagement user) 
 	{
 		professor.clear();
 		ProfessorCourseMapping r = new ProfessorCourseMapping();
-		String Sql = "select * from professorCourses where courseid ="+id;
-		professorcourses = jdbcTemplate.query(Sql, r);
-		List pro = new ArrayList();
-		ProfessorMapping rs = new ProfessorMapping();
-		for(ProfessorCourses p: professorcourses)
+		String Sql3 = "select * from usermanagement where userid= "+id+" and roleid="+3;
+		users = jdbcTemplate.query(Sql3, new UserManagementMapping());
+		for(UserManagement u : users)
 		{
-			String Sql1 = "select * from professor where id ="+p.getProfessorId();
-			pro = jdbcTemplate.query(Sql1,rs);
-			professor.add( pro);
-			
-		}
-		
-		return professor;
-	}
-	
-	
-	/*
-	 * Fetch Student Details for course will be used by professor
-	 * @Param professor id
-	 * @Throws
-	 */
-	@Override
-	@Transactional
-	public List<List<Student>> fetchStudents(long id) 
-	{
-		String Sql = "select * from professorcourses where professorid =" +id;
-		professorcourses = jdbcTemplate.query(Sql,new ProfessorCourseMapping());
-		
-		for(ProfessorCourses p: professorcourses)
-		{
-			String Sql1 = "select * from studentenrollment where courseId ="+ p.getCourseId();
-			studentEnrollment = jdbcTemplate.query(Sql1, new StudentEnrollementMapping());
-			for (StudentEnrollment s: studentEnrollment)
+			if(u.getUsername().equals((user.getUsername())))
 			{
-				String Sql2 = "select * from studentregistration where Id =" + s.getStudentId();
-				students = jdbcTemplate.query(Sql2, new StudentMapping());
-				studentsDetails.add(students);
+				if(u.getPassword().equals(user.getPassword()))
+				{
+					String Sql = "select * from professorCourses where courseid ="+id;
+					professorcourses = jdbcTemplate.query(Sql, r);
+					List pro = new ArrayList();
+					ProfessorMapping rs = new ProfessorMapping();
+					for(ProfessorCourses p: professorcourses)
+					{
+						String Sql1 = "select * from professor where id ="+p.getProfessorId();
+						pro = jdbcTemplate.query(Sql1,rs);
+						professor.add( pro);
+						
+					}
+					
+				}
+				else 
+				{
+					professor.clear();
+				}
+			}
+			else 
+			{
+				professor.clear();
 			}
 		}
-		return studentsDetails;
+		
+	
+		return professor;
 	}
+		
 	
 	/*
 	 * Fetch all course details 
@@ -200,6 +196,7 @@ public class UserDAOImpl implements UserDAO {
 		return courses;
 	}
 	
+	
 	/*
 	 * Drop Courses  By Students
 	 * @Param courseId and Student Id
@@ -210,7 +207,7 @@ public class UserDAOImpl implements UserDAO {
 
 	public int deletecourse(int id, int courseId) 
 	{
-		String Sql = "SELECT * FROM student where id = " + id;
+		String Sql = "SELECT * FROM studentregistration where id = " + id;
 		List<Student> student =  jdbcTemplate.query(Sql, new StudentMapping());
 		logger.debug("value",jdbcTemplate.query(Sql, new StudentMapping()));
 		if(student.isEmpty())
@@ -238,21 +235,7 @@ public class UserDAOImpl implements UserDAO {
 		
 	}
 	
-	/*
-	 * Add New Courses By Admin
-	 * @Param course
-	 * @Throws
-	 */
-	@Override
-	@Transactional
-	public String addCourse(Courses course)
-	{
-		String Sql = "insert into courses(name,description) values(?,?)";
-		jdbcTemplate.update(Sql,course.getName(),course.getDescription());
-		logger.debug("value",jdbcTemplate.update(Sql,course.getName(),course.getDescription()));
-		
-		return "Successful";
-	}
+	
 	
 
 	/*
@@ -295,6 +278,8 @@ public class UserDAOImpl implements UserDAO {
 		
 	}
 	
+	
+	
 	/*
 	 * View grades by students
 	 * @Param grades
@@ -302,12 +287,18 @@ public class UserDAOImpl implements UserDAO {
 	 */
 	@Override
 	@Transactional
-	public List viewgrades(int id) 
+	public Map viewgrades(int id) 
 	{
-		
-		String Sql = "select * from grade where studentid ="+ id;
-		List grade = jdbcTemplate.query(Sql, new GradeMapping());
-		return grade;
+		Map m = new HashMap();
+		String Sql = "select * from studentgrade where studentid ="+ id;
+		studentgrade = jdbcTemplate.query(Sql, new StudentGradeMapping());
+		for(StudentGrades s: studentgrade)
+		{
+			String Sql1 = "select * from grade where id ="+s.getGradeId();
+			grade=jdbcTemplate.query(Sql1, new GradeMapping());
+			m.put(s.getSem(), grades.add(grade));
+		}
+		return m;
 	}
 
 	/*
@@ -327,79 +318,6 @@ public class UserDAOImpl implements UserDAO {
 			
 		}
 		
-	
-	
-	/*
-	 * Add grades to students by professor
-	 * @Param grades and professor id
-	 * @Throws
-	 */
-
-	@Override
-	@Transactional
-	public int addGradesByProfessor(int id, StudentGrades grades)
-	{
-		String Sql = "insert into studentgrade (studentid,gradeid,sem,professorid)"
-				+ "values(?,?,?,?)";
-		int add = jdbcTemplate.update(Sql,grades.getStudentId(),grades.getGradeId(),grades.getSem(),id);
-				
-		return add;
-	}
-	
-	
-	/*
-	 * Add New Grades By Admin
-	 * @Param 
-	 * @Throws
-	 */
-
-	@Override
-	@Transactional
-	public String addGradesByAdmin(Grades grade) {
-	
-		String Sql = "insert into grade(grade,result,percentage) "
-				+ "values(?,?,?)";
-		jdbcTemplate.update(Sql,grade.getGrade(),grade.getResult(),grade.getPercent());
-		return "Successful";
-	}
-	
-
-	/*
-	 * Remove Courses By Admin
-	 * @Param course id
-	 * @Throws
-	 */
-
-	@Override
-	@Transactional
-	public int deleteCoursesByAdmin(int id) {
-		
-		String Sql = "Delete from courses where id =?";
-		int response = jdbcTemplate.update(Sql,id);
-		return response;
-	}
-
-	
-	/*
-	 * Admin approves the student
-	 * @Param student id
-	 * @Throws
-	 */
-	@Override
-	@Transactional
-	public int studentApprovalByAdmin(int id) {
-		
-		String Sql = "update Adminapproval set status =? where studentid =?";
-		int response = jdbcTemplate.update(Sql,"Approved",id);
-		return response;
-	}
-
-	
-
-
-
-
-
 	
 
 }

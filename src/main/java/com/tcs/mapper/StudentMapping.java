@@ -27,6 +27,7 @@ public class StudentMapping implements RowMapper<Student>{
 		student.setLastName(r.getString("lastname"));
 		student.setId(r.getLong("id"));
 		student.setMobileNo(r.getLong("mobile"));
+		
 		return student;
 	}
 	
